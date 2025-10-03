@@ -1,3 +1,4 @@
+
 body {
   margin: 0;
   padding: 0;
@@ -6,32 +7,32 @@ body {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  font-family: "Nunito", sans-serif;
-  background: linear-gradient(to bottom, #ffffff, #d6d6d6);
+  font-family: "Lato", sans-serif;
+  background: linear-gradient(to bottom, #f4f4f4, #fff);
 }
 
 .main {
-  width: 350px;
-  height: 500px;
+  width: 400px;
+  height: 550px;
   overflow: hidden;
-  background:white;
-  border-radius: 10px;
-  box-shadow: 5px 20px 50px #00000056;
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0px 15px 40px rgba(0, 0, 0, 0.2);
 }
 
-.header{
-	position: absolute;
-	top: 0;
-	display: flex;
-	justify-content: center;
-	width: 100%;
-	height: 200;
+.header {
+  position: absolute;
+  top: 0;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  height: 200px;
 }
 
-.header img{
-	padding: 2em;
-	width: 200px;
-	height: fit-content;
+.header img {
+  padding: 2em;
+  width: 220px;
+  height: fit-content;
 }
 
 #chk {
@@ -42,109 +43,74 @@ body {
   position: relative;
   width: 100%;
   height: 100%;
+  text-align: center;
 }
 
 #loginbtn {
-  display: flex; 
-  align-items: center; 
-  gap: 10px;
-  width: 70% !important;
-  padding: 10px 15px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  width: 80% !important;
+  padding: 12px 20px;
   border: none;
-  margin-bottom: -20%;
-  background-color: white;
+  margin-bottom: -15%;
+  background-color: #4285F4;
+  color: white;
   cursor: pointer;
-  border-radius: 5px;
-  font-size: 15px;
+  border-radius: 8px;
+  font-size: 16px;
   font-weight: bold;
-  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+#loginbtn:hover {
+  background-color: #3367D6;
 }
 
 #loginbtn img {
-  width: 20px; 
+  width: 24px;
   height: auto;
 }
 
 #loginbtn span {
- margin: 10px !important;
+  margin: 0 !important;
 }
 
 label {
-  color: #000000;
-  font-size: 2.3em;
-  justify-content: center;
-  display: flex;
-  margin: 50px;
+  color: #333;
+  font-family: "Montserrat", sans-serif;
+  font-size: 2.5em;
   font-weight: bold;
   text-align: center;
+  margin: 40px;
   cursor: pointer;
   transition: 0.5s ease-in-out;
 }
 
 span {
-  color: #1a1a1a;
-  font-size: 1em;
+  color: #555;
+  font-size: 1.1em;
   justify-content: center;
   display: flex;
-  margin: 50px;
+  margin: 40px;
   cursor: pointer;
   transition: 0.5s ease-in-out;
 }
 
-.signup label{
-  font-size: 1.5em !important;
-}
-
-
-input {
-  width: 60%;
-  height: 10px;
-  margin: 20px auto;
-  background: #e0dede;
-  justify-content: center;
-  display: flex;
-  font-size: 16px;
-  border-radius: 10px;
-  padding: 15px;
-  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.03) inset;
-  border: 2px solid #e0dede;
-  transition: all 0.3s ease-in-out;
-}
-
-input:focus{
-	border: 2px solid #006ad0 !important;
-} 
-
-button {
-  width: 60%;
-  height: 40px;
-  margin: 10px auto;
-  justify-content: center;
-  display: block;
-  color: #fff;
-  background: #006ad0;
-  font-size: 1em;
-  font-weight: bold;
-  margin-top: 30px;
-  outline: none;
-  border: none;
-  border-radius: 5px;
-  transition: 0.2s ease-in;
-  cursor: pointer;
-}
-
-button:hover {
-  background: #006ad0;
+.signup label {
+  font-size: 1.8em !important;
 }
 
 .login {
-  height: 460px;
-  background: #006ad0;
-  padding: .5em;
-  border-radius: 60% / 10%;
-  transform: translateY(-180px);
+  height: 480px;
+  background: #333;
+  padding: 1em;
+  border-radius: 70% / 12%;
+  transform: translateY(-150px);
   transition: 0.8s ease-in-out;
 }
+
 .login label {
   color: white;
   transform: scale(0.6);
@@ -152,25 +118,28 @@ button:hover {
 
 .login button {
   background: #fff;
-  color: #006ad0;
+  color: #333;
 }
 
 #chk:checked ~ .login {
-  transform: translateY(-500px);
+  transform: translateY(-520px);
 }
+
 #chk:checked ~ .login label {
   transform: scale(1);
 }
+
 #chk:checked ~ .signup label {
   transform: scale(0.6);
   opacity: 0;
 }
+
 #chk:checked ~ .signup span {
   transform: scale(0.6);
 }
 
-#space  {
-  height: 50px;
+#space {
+  height: 60px;
   margin-top: 0px;
   cursor: pointer;
   transform: scale(1) !important;
@@ -179,18 +148,17 @@ button:hover {
   justify-content: center;
 }
 
-#logintxt{
-  margin-top: -80px !important;
-  font-size: xxx-large;
+#logintxt {
+  margin-top: -90px !important;
+  font-size: 3em;
 }
 
 @media screen and (max-width: 600px) {
-	.header img{
-		padding: 2em;
-		width: 150px;
-        height: fit-content;
-	}
-	
+  .header img {
+    padding: 2em;
+    width: 180px;
+    height: fit-content;
+  }
 }
 #aviso{
   justify-content: center;
