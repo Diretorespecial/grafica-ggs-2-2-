@@ -1,140 +1,260 @@
-/* ======= Reset básico ======= */
+/* ======= Reset & Global Styles ======= */
 body {
-  font-family: 'Nunito', sans-serif;
-  color: #2c3e50;
+  font-family: 'Lato', sans-serif;
+  color: #333;
   margin: 0;
-  padding: 0;
-  background: #f5f9fc; /* fundo suave azul-claro */
-}
-
-/* ======= Layout principal ======= */
-.conatiner {
+  padding: 20px;
+  background-color: #f4f7f6;
   display: flex;
-  gap: 20px;
-  justify-content: center;
-  flex-wrap: wrap;
+  flex-direction: column;
+  align-items: center;
 }
 
-/* ======= Cabeçalho ======= */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 700;
+  color: #222;
+}
+
+/* ======= Main Layout ======= */
+.row {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  width: 100%;
+  max-width: 900px;
+  margin-top: 20px;
+}
+
+.conatiner { /* Typo in original HTML, should be container */
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+/* ======= Header ======= */
 .header {
+  width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 15px;
+  padding: 10px 0 30px 0;
+  border-bottom: 1px solid #e0e0e0;
+  margin-bottom: 20px;
+  position: relative;
 }
 
 .header img {
-  max-width: 200px;
+  width: 200px;
   height: auto;
 }
 
 .user {
   position: absolute;
-  top: 15px;
-  right: 15px;
+  top: 50%;
+  right: 20px;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  gap: 15px;
 }
 
-.user img {
-  width: 80px;
-  height: 80px;
+.user #message, .user b {
+    font-size: 1em;
+}
+
+.user img#pic {
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
-  border: 2px solid #3498db;
+  border: 3px solid #4285F4;
 }
 
-/* ======= Formulário ======= */
-form {
-  background: white;
-  border-radius: 8px;
-  padding: 20px;
-  width: 100%;
-  max-width: 600px;
+/* ======= Card Style ======= */
+form, .results, #avisos {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 30px;
   box-sizing: border-box;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-  border-top: 4px solid #3498db;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e0e0e0;
 }
 
-/* ======= Bloco de resultados ======= */
-.results {
-  background: white;
-  border-radius: 8px;
-  padding: 20px;
+/* ======= Form Specifics ======= */
+form h1 {
+  text-align: center;
+  margin-bottom: 30px;
+  font-size: 2em;
+}
+
+fieldset {
+  border: none;
+  padding: 0;
+  margin: 0 0 20px 0;
+}
+
+legend {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 700;
+  font-size: 1.2em;
+  color: #333;
+  margin-bottom: 20px;
   width: 100%;
-  max-width: 600px;
-  box-sizing: border-box;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-  border-top: 4px solid #3498db;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
 }
 
-/* ======= Avisos ======= */
-#avisos {
-  background: #eaf4fc;
-  border-left: 4px solid #3498db;
-  border-radius: 8px;
-  padding: 15px;
-  width: 100%;
-  max-width: 600px;
-  box-sizing: border-box;
+.form-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
 }
 
-/* ======= Inputs e Selects ======= */
-input, select, textarea, button {
-  width: 100%;
-  padding: 10px;
-  margin-top: 6px;
-  margin-bottom: 16px;
-  border-radius: 4px;
-  border: 1px solid #ccc;
-  box-sizing: border-box;
-  font-size: 14px;
+#pjFields {
+    display: none; /* Keep it hidden by default */
 }
 
-/* Remove a seta padrão do select */
+.input-group {
+    display: flex;
+    flex-direction: column;
+}
+
+label {
+  font-weight: 700;
+  margin-bottom: 8px;
+  font-size: 0.9em;
+  color: #555;
+}
+
+input[type="text"],
+input[type="date"],
 select {
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  background-color: white;
-  background-image: none;
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  box-sizing: border-box;
+  font-size: 1em;
+  transition: border-color 0.3s, box-shadow 0.3s;
 }
 
-/* ======= Botão ======= */
-button {
-  background-color: #3498db;
+input[type="text"]:focus,
+input[type="date"]:focus,
+select:focus {
+  outline: none;
+  border-color: #4285F4;
+  box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.2);
+}
+
+.radioDiv {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.radioDiv label {
+  font-weight: normal;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.radioDiv input {
+    margin-right: 8px;
+}
+
+
+/* ======= Person Type Buttons ======= */
+.personType {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 30px;
+}
+
+.personType button {
+    padding: 10px 20px;
+    font-size: 1em;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    background-color: #f0f0f0;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.personType button:not(.inactive) {
+    background-color: #4285F4;
+    color: white;
+    border-color: #4285F4;
+}
+
+/* ======= Main Action Button ======= */
+#generateDoc {
+  background-color: #4285F4;
   color: white;
-  font-size: 16px;
+  font-size: 1.1em;
+  font-weight: bold;
   cursor: pointer;
   border: none;
-  transition: background 0.3s ease;
+  padding: 15px;
+  border-radius: 8px;
+  width: 100%;
+  transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
-button:hover {
-  background-color: #2980b9;
+#generateDoc:hover {
+  background-color: #3367D6;
+  transform: translateY(-2px);
 }
 
-/* ======= Responsividade ======= */
+/* ======= Notices ======= */
+#avisos {
+  border-left: 5px solid #4285F4;
+}
+
+#avisos h2 {
+    margin-top: 0;
+}
+
+/* ======= Results ======= */
+.results {
+  text-align: center;
+}
+
+.result img {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 5px;
+    margin-bottom: 15px;
+}
+
+.result button {
+    width: auto;
+    padding: 10px 30px;
+}
+
+/* ======= Utility & Hidden ======= */
+.hidden {
+  display: none !important;
+}
+
+/* ======= Responsiveness ======= */
 @media screen and (max-width: 768px) {
-  .header img {
-    max-width: 150px;
+  .form-group {
+    grid-template-columns: 1fr;
   }
-  .user img {
-    width: 60px;
-    height: 60px;
+
+  .header {
+      flex-direction: column;
+      text-align: center;
+      gap: 15px;
+  }
+
+  .user {
+      position: static;
+      transform: none;
+      justify-content: center;
   }
 }
-
-@media screen and (max-width: 480px) {
-  body {
-    padding: 10px;
-  }
-  .header img {
-    max-width: 120px;
-  }
-  .user img {
-    width: 50px;
-    height: 50px;
-  }
-  #avisos {
-    height: auto;
-  }
-}
-
