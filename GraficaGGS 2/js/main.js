@@ -332,6 +332,10 @@ function checkimputs() {
     }
   });
 
+  if (!allFieldsFilled) {
+    alert("Por favor, preencha todos os campos obrigatórios.");
+  }
+
   if (!$("input[name='receituario']:checked").val()) {
     alert("Por favor, selecione um tipo de receituário.");
     return false;
