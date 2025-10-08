@@ -1,7 +1,7 @@
 {
   "name": "GraficaGGS",
   "short_name": "GraficaGGS",
-  "start_url": "index.html",
+  "start_url": "Formulario.html",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#000000",
