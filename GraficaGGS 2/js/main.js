@@ -178,8 +178,8 @@ $(document).ready(function () {
     let mes = dataFormatada.toLocaleString("default", { month: "long" });
     let ano = dataFormatada.getFullYear();
 
-    // Função genérica para gerar PDF a partir de Canvas
-    function gerarPDF(imgSrc, largura, altura, downloadBtnId, fileName, drawCallback) {
+    // Função genérica para gerar imagem JPEG compacta
+    function gerarImagem(imgSrc, largura, altura, downloadBtnId, fileName, drawCallback) {
       let canvas = document.createElement("canvas");
       let ctx = canvas.getContext("2d");
       let img = new Image();
@@ -190,17 +190,18 @@ $(document).ready(function () {
         canvas.height = img.height;
         ctx.drawImage(img, 0, 0);
         drawCallback(ctx);
-        const { jsPDF } = window.jspdf;
-        let doc = new jsPDF({ orientation: "portrait", unit: "mm", format: [largura, altura] });
-        let imgData = canvas.toDataURL("image/png");
-        doc.addImage(imgData, "PNG", 0, 0, largura, altura);
-        $(`#${downloadBtnId}`).attr("href", doc.output("bloburl")).attr("download", fileName).show();
+
+        // converte o canvas em imagem JPEG compacta
+        const imgData = canvas.toDataURL("image/jpeg", 0.85);
+
+        // aplica no botão de download e preview
+        $(`#${downloadBtnId}`).attr("href", imgData).attr("download", fileName).show();
         $(`#preview${downloadBtnId.slice(-1)}`).attr("src", imgData);
       };
     }
 
     // Receituário
-    gerarPDF(docPath, 960, 355, "downloadBtn", "receituario.pdf", function (ctx) {
+    gerarImagem(docPath, 960, 355, "downloadBtn", "receituario.jpg", function (ctx) {
       ctx.font = docType == "tipo_amarelo" ? "50px TimesNewRoman" : "60px TimesNewRoman";
       ctx.fillStyle = "black";
       ctx.textAlign = "center";
@@ -227,7 +228,7 @@ $(document).ready(function () {
 
     // Procuração
     let procuracaoPath = docType == "tipo_amarelo" ? "assets/procuracao_a.png" : "assets/procuracao.png";
-    gerarPDF(procuracaoPath, 210, 297, "downloadBtn2", "procuracao.pdf", function (ctx2) {
+    gerarImagem(procuracaoPath, 210, 297, "downloadBtn2", "procuracao_a.jpg", function (ctx2) {
       ctx2.font = "bold 40px Arial";
       ctx2.fillStyle = "black";
       if (docType == "tipo_amarelo") {
@@ -259,7 +260,7 @@ $(document).ready(function () {
     });
 
     // Requisição
-    gerarPDF("assets/requisicao.png", 210, 297, "downloadBtn3", "requisicao.pdf", function (ctx3) {
+    gerarImagem("assets/requisicao.png", 210, 297, "downloadBtn3", "requisicao.jpg", function (ctx3) {
       ctx3.font = "bold 30px Arial";
       ctx3.fillStyle = "black";
       if (ispf) {
@@ -294,7 +295,7 @@ $(document).ready(function () {
     });
 
     // Declaração
-    gerarPDF("assets/declaracao.png", 210, 297, "downloadBtn4", "declaracao.pdf", function (ctx4) {
+    gerarImagem("assets/declaracao.png", 210, 297, "downloadBtn4", "declaracao.jpg", function (ctx4) {
       ctx4.font = "28px Arial";
       ctx4.fillStyle = "black";
       ctx4.fillText(nome, 208, 358);
@@ -343,6 +344,7 @@ function checkimputs() {
 
   return allFieldsFilled;
 }
+
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/sw.js')
     .then(reg => console.log('Service Worker registered', reg))
