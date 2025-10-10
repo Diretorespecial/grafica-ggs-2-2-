@@ -73,7 +73,7 @@ $(document).ready(function () {
   // Alternar pessoa física
   $("#fisica").click(function () {
     $("#avisoP").html(`
-      ● Procuração, Requisição e Declaração (ambos gerados aqui) assinados no <a href="https://gov.br" target="_blank">gov.br</a>  <br>
+      ● Procuração, Requisição (ambos gerados aqui) assinados no <a href="https://gov.br" target="_blank">gov.br</a>  <br>
       ● CRM frente e verso.<br>
       ● Declaração ou comprovante de endereço de atendimento em nome do médico (a Secretaria de Saúde aceita apenas contas de água, luz ou telefone) com até 90 dias de emissão.<br>
     `);
@@ -376,3 +376,4 @@ installBtn.addEventListener('click', (e) => {
 window.addEventListener('appinstalled', (evt) => {
   console.log('App installed');
 });
+
