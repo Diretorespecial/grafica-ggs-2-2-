@@ -1,6 +1,5 @@
 // Autor: José Minelli
 isdebug = false;
-
 isminimized = false;
 ispf = true;
 ispj = false;
@@ -73,7 +72,7 @@ $(document).ready(function () {
   // Alternar pessoa física
   $("#fisica").click(function () {
     $("#avisoP").html(`
-      ● Procuração, Requisição (ambos gerados aqui) assinados no <a href="https://gov.br" target="_blank">gov.br</a>  <br>
+      ● Procuração, Requisição e Declaração (ambos gerados aqui) assinados no <a href="https://gov.br" target="_blank">gov.br</a>  <br>
       ● CRM frente e verso.<br>
       ● Declaração ou comprovante de endereço de atendimento em nome do médico (a Secretaria de Saúde aceita apenas contas de água, luz ou telefone) com até 90 dias de emissão.<br>
     `);
@@ -105,6 +104,24 @@ $(document).ready(function () {
     $("#juridica").removeClass("inactive");
   });
 
+  // Função para gerar imagem JPEG
+  function gerarImagem(imgSrc, downloadBtnId, fileName, drawCallback) {
+    let canvas = document.createElement("canvas");
+    let ctx = canvas.getContext("2d");
+    let img = new Image();
+    img.src = imgSrc;
+
+    img.onload = function () {
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx.drawImage(img, 0, 0);
+      drawCallback(ctx);
+      let imgData = canvas.toDataURL("image/jpeg", 0.85); // Compressão leve
+      $(`#${downloadBtnId}`).attr("href", imgData).attr("download", fileName).show();
+      $(`#preview${downloadBtnId.slice(-1)}`).attr("src", imgData);
+    };
+  }
+
   // Gerar documentos
   $("#generateDoc").click(function () {
     if (!checkimputs()) return;
@@ -119,9 +136,9 @@ $(document).ready(function () {
     let docType = $("input[name='receituario']:checked").val();
     let docPath = `assets/${docType}.png`;
 
-    // Coleta dados do formulário
+    // Coleta dados
     let nome, crm, especialidade, endereco, telefone, bairro, cidade, cep,
-        rg, numero, data, valor, complemento, nomesocial, cpf, rua;
+      rg, numero, data, valor, complemento, cpf, rua;
 
     if ($("#fisica").hasClass("inactive")) { // PJ
       nome = $("#razaoSocial").val();
@@ -137,7 +154,6 @@ $(document).ready(function () {
       complemento = $("#complemento_pj").val();
       cpf = $("#cnpj").val();
       rg = "";
-      nomesocial = $("#razaoSocial").val();
       data = $("#data_pj").val();
     } else { // PF
       rua = $("#rua").val();
@@ -153,12 +169,11 @@ $(document).ready(function () {
       rg = $("#rg").val();
       numero = $("#numero").val();
       cpf = $("#cpf").val();
-      nomesocial = $("#nome_social").val();
       data = $("#data").val();
     }
 
-    if (isdebug) { // Dados de teste
-      nome = nomesocial = "José Minelli";
+    if (isdebug) {
+      nome = "José Minelli";
       crm = "123456";
       especialidade = "Cardiologia";
       endereco = "Rua Exemplo, 123";
@@ -178,30 +193,8 @@ $(document).ready(function () {
     let mes = dataFormatada.toLocaleString("default", { month: "long" });
     let ano = dataFormatada.getFullYear();
 
-    // Função genérica para gerar imagem JPEG compacta
-    function gerarImagem(imgSrc, largura, altura, downloadBtnId, fileName, drawCallback) {
-      let canvas = document.createElement("canvas");
-      let ctx = canvas.getContext("2d");
-      let img = new Image();
-      img.src = imgSrc;
-
-      img.onload = function () {
-        canvas.width = img.width;
-        canvas.height = img.height;
-        ctx.drawImage(img, 0, 0);
-        drawCallback(ctx);
-
-        // converte o canvas em imagem JPEG compacta
-        const imgData = canvas.toDataURL("image/jpeg", 0.85);
-
-        // aplica no botão de download e preview
-        $(`#${downloadBtnId}`).attr("href", imgData).attr("download", fileName).show();
-        $(`#preview${downloadBtnId.slice(-1)}`).attr("src", imgData);
-      };
-    }
-
     // Receituário
-    gerarImagem(docPath, 960, 355, "downloadBtn", "receituario.jpg", function (ctx) {
+    gerarImagem(docPath, "downloadBtn", "receituario.jpg", function (ctx) {
       ctx.font = docType == "tipo_amarelo" ? "50px TimesNewRoman" : "60px TimesNewRoman";
       ctx.fillStyle = "black";
       ctx.textAlign = "center";
@@ -228,7 +221,7 @@ $(document).ready(function () {
 
     // Procuração
     let procuracaoPath = docType == "tipo_amarelo" ? "assets/procuracao_a.png" : "assets/procuracao.png";
-    gerarImagem(procuracaoPath, 210, 297, "downloadBtn2", "procuracao_a.jpg", function (ctx2) {
+    gerarImagem(procuracaoPath, "downloadBtn2", "procuracao_a.jpg", function (ctx2) {
       ctx2.font = "bold 40px Arial";
       ctx2.fillStyle = "black";
       if (docType == "tipo_amarelo") {
@@ -260,12 +253,12 @@ $(document).ready(function () {
     });
 
     // Requisição
-    gerarImagem("assets/requisicao.png", 210, 297, "downloadBtn3", "requisicao.jpg", function (ctx3) {
+    gerarImagem("assets/requisicao.png", "downloadBtn3", "requisicao.jpg", function (ctx3) {
       ctx3.font = "bold 30px Arial";
       ctx3.fillStyle = "black";
       if (ispf) {
         ctx3.fillText(nome, 200, 360);
-        ctx3.fillText(nomesocial, 200, 420);
+        ctx3.fillText(nome, 200, 420); // Substitui nomesocial por nome
         ctx3.fillText(crm, 200, 490);
         ctx3.fillText(especialidade, 500, 490);
         ctx3.fillText(telefone, 1100, 490);
@@ -295,7 +288,7 @@ $(document).ready(function () {
     });
 
     // Declaração
-    gerarImagem("assets/declaracao.png", 210, 297, "downloadBtn4", "declaracao.jpg", function (ctx4) {
+    gerarImagem("assets/declaracao.png", "downloadBtn4", "declaracao.jpg", function (ctx4) {
       ctx4.font = "28px Arial";
       ctx4.fillStyle = "black";
       ctx4.fillText(nome, 208, 358);
@@ -376,4 +369,3 @@ installBtn.addEventListener('click', (e) => {
 window.addEventListener('appinstalled', (evt) => {
   console.log('App installed');
 });
-
