@@ -72,7 +72,7 @@ $(document).ready(function () {
   // Alternar pessoa física
   $("#fisica").click(function () {
     $("#avisoP").html(`
-      ● Procuração, Requisição e Declaração (ambos gerados aqui) assinados no <a href="https://gov.br" target="_blank">gov.br</a>  <br>
+      ● Procuração, Requisição e Declaração55 (ambos gerados aqui) assinados no <a href="https://gov.br" target="_blank">gov.br</a>  <br>
       ● CRM frente e verso.<br>
       ● Declaração ou comprovante de endereço de atendimento em nome do médico (a Secretaria de Saúde aceita apenas contas de água, luz ou telefone) com até 90 dias de emissão.<br>
     `);
@@ -198,7 +198,7 @@ $(document).ready(function () {
       ctx.font = docType == "tipo_amarelo" ? "50px TimesNewRoman" : "60px TimesNewRoman";
       ctx.fillStyle = "black";
       ctx.textAlign = "center";
-      endereco = endereco + " " + numero + " - " + bairro;
+     /* endereco = endereco + " " + numero + " - " + bairro;*/
       telefone = telefone + " - " + cidade + " - MG";
       if (docType == "tipo_amarelo") {
         ctx.fillText(nome, 1400, 160);
@@ -224,12 +224,14 @@ $(document).ready(function () {
     gerarImagem(procuracaoPath, "downloadBtn2", "procuracao_a.jpg", function (ctx2) {
       ctx2.font = "bold 40px Arial";
       ctx2.fillStyle = "black";
+      endereco1 = rua + "-" + numero + " - " + bairro;
+      endereco2 = rua + "-" + numero;
       if (docType == "tipo_amarelo") {
         ctx2.fillText(nome, 650, 820);
         ctx2.font = "bold 35px Arial";
         ctx2.fillText(rg, 1000, 900);
         ctx2.fillText(cpf, 100, 980);
-        ctx2.fillText(endereco, 100, 1090);
+        ctx2.fillText(endereco1, 100, 1090);
         ctx2.fillText(cidade, 1700, 1090);
         ctx2.fillText("MG", 300, 1190);
         ctx2.fillText(dia, 1680, 1840);
@@ -242,7 +244,7 @@ $(document).ready(function () {
         ctx2.fillText(rg, 680, 505);
         ctx2.fillText(cpf, 100, 565);
         ctx2.font = "bold 30px Arial";
-        ctx2.fillText(endereco, 100, 615);
+        ctx2.fillText(endereco2, 100, 615);
         ctx2.fillText(bairro, 100, 680);
         ctx2.fillText(cidade, 800, 680);
         ctx2.fillText(dia, 1025, 1100);
@@ -369,3 +371,6 @@ installBtn.addEventListener('click', (e) => {
 window.addEventListener('appinstalled', (evt) => {
   console.log('App installed');
 });
+
+
+
