@@ -19,11 +19,7 @@
         <span id="message">Seja bem vindo</span>
         <b><span id=></span></b>
         <span>!</span>
-        <img
-          id="pic"
-          src="images/default_avatar.jpg"
-          alt=""
-        />
+        <img id="pic" src="images/default_avatar.jpg" alt="" />
       </div>
     </div>
 
@@ -95,6 +91,12 @@
                   <input type="text" id="telefone" name="telefone" required />
                 </div>
                 <div class="input-group">
+                  <label for="rg">RG:</label>
+                  <input type="text" id="rg" name="rg" required />
+                </div>
+                <h4>Endereço comercial</h4>
+                <hr>
+                <div class="input-group">
                   <label for="cep">CEP:</label>
                   <input type="text" id="cep" name="cep" required />
                 </div>
@@ -118,6 +120,7 @@
                   <label for="bairro">Bairro:</label>
                   <input type="text" id="bairro" name="bairro" required />
                 </div>
+
                 <div class="input-group">
                   <label for="cpf">CPF:</label>
                   <input type="text" id="cpf" name="cpf" required />
@@ -126,8 +129,9 @@
                   <label for="rg">RG:</label>
                   <input type="text" id="rg" name="rg" required />
                 </div>
+                <hr>
                 <div class="input-group">
-                  <label for="endereco">Endereço Comercial: (ex: Rua/Av, Bairro, Número, Cidade.)</label>
+                  <label for="endereco"><h4></h4>Endereço Residencial: (ex: Rua/Av, Bairro, Número, Cidade.)</h4></label>
                   <input type="text" class="endereco" id="endereco" name="endereco" required />
                 </div>
                 <div class="input-group">
@@ -150,10 +154,8 @@
                   <label for="telefone_pj">Telefone:</label>
                   <input type="text" id="telefonePJ" name="telefone_pj" required />
                 </div>
-                <div class="input-group">
-                  <label for="rua">Rua/Av:</label>
-                  <input type="text" id="rua" name="rua" required />
-                </div>
+                 <h4>Endereço comercial</h4>
+                <hr>
                 <div class="input-group">
                   <label for="numero_pj">Número:</label>
                   <input type="text" id="numero_pj" name="numero_pj" required />
@@ -171,9 +173,14 @@
                   <input type="text" id="bairro_pj" name="bairro_pj" required />
                 </div>
                 <div class="input-group">
+                  <label for="rua">Rua/Av:</label>
+                  <input type="text" id="rua" name="rua" required />
+                </div>
+                <div class="input-group">
                   <label for="cep_pj">CEP:</label>
                   <input type="text" id="cep_pj" name="cep_pj" required />
                 </div>
+                <hr>
                 <div class="input-group">
                   <label for="crm_pj">CRM / CRMV / CRO <span>(identificar tipo)</span> :</label>
                   <input type="text" id="crmPJ" name="crm_pj" required />
@@ -183,9 +190,13 @@
                   <input type="text" id="especialidadePJ" name="especialidade_pj" required />
                 </div>
                 <div class="input-group">
-                  <label for="endereco_pj">Endereço:</label>
+                  <h4>Endereço residencial</h4>
+                <hr> <hr>
+                  <label for="endereco_pj">Endereço: (ex: Rua/Av, Bairro, Número, Cidade.)</label>
                   <input type="text" class="endereco" id="enderecoPJ" name="endereco_pj" required />
                 </div>
+      
+                <hr>
                 <div class="input-group">
                   <label for="data">Data:</label>
                   <input type="date" class="data" id="data_pj" name="data_pj" required />
@@ -223,8 +234,8 @@
           </div>
         </div>
       </div>
-
     </div>
+
     <button id="installBtn">Instalar App</button>
     <script type="module" src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script type="module" src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js"></script>
@@ -232,6 +243,10 @@
     <script src="js/main.js"></script>
   </body>
 </html>
+
+
+
+
 
 
 
