@@ -1,0 +1,24 @@
+rules_version = '2';
+
+// Regras do Storage para os arquivos de cada solicitação (procuração, autorização
+// preenchida e documentos enviados). Os caminhos nunca usam o nome de arquivo
+// enviado pelo usuário (evita path traversal / nomes inseguros) — o nome original
+// fica só como metadado no Firestore (campo fileName).
+//
+// Deploy: sem Firebase CLI neste ambiente. Cole este conteúdo em
+// Firebase Console > Storage > Regras > publicar.
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /solicitacoes/{protocolo}/{allPaths=**} {
+      allow read: if request.auth != null && (
+        firestore.get(/databases/(default)/documents/solicitacoes/$(protocolo)).data.ownerUid == request.auth.uid ||
+        firestore.exists(/databases/(default)/documents/admins/$(request.auth.uid))
+      );
+
+      allow write: if request.auth != null &&
+        firestore.get(/databases/(default)/documents/solicitacoes/$(protocolo)).data.ownerUid == request.auth.uid &&
+        request.resource.size < 15 * 1024 * 1024 &&
+        request.resource.contentType.matches('application/pdf|image/jpeg|image/png');
+    }
+  }
+}

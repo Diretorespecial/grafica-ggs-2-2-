@@ -1,22 +1,9 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-app.js";
 import {
-  getAuth,
   signInWithPopup,
   GoogleAuthProvider,
 } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-auth.js";
+import { auth } from "./firebaseApp.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyDduCmbkMJCMPjzB4KrMjufIoGP-myiibs",
-  authDomain: "graficaggs-1ac94.firebaseapp.com",
-  projectId: "graficaggs-1ac94",
-  storageBucket: "graficaggs-1ac94.firebasestorage.app",
-  messagingSenderId: "413867470248",
-  appId: "1:413867470248:web:8374ac2beca05162fb819d",
-};
-
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
 auth.languageCode = "it";
 const provider = new GoogleAuthProvider();
 

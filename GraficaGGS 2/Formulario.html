@@ -29,7 +29,7 @@
           <h2>Aviso</h2>
           <h4>
             Os documentos gerados aqui devem ser enviados no WhatsApp do número
-            <br /><i>+55 31 98743-5878</i> junto de:
+            <br /><i id="whatsappNumber"></i> junto de:
           </h4>
           <p id="avisoP">
             ● Procuração (gerada aqui) assinada no
@@ -75,8 +75,12 @@
               <div id="pfFields">
                 <!-- Campos Pessoa Física -->
                 <div class="input-group">
-                  <label for="name">Nome do(a) Profissional:</label>
+                  <label for="nameform">Nome do(a) Profissional:</label>
                   <input type="text" id="nameform" name="user_name" required />
+                </div>
+                <div class="input-group">
+                  <label for="nomeSocial">Nome Social:</label>
+                  <input type="text" id="nomeSocial" name="nome_social" />
                 </div>
                 <div class="input-group">
                   <label for="crm">CRM / CRMV / CRO <span>(identificar tipo)</span> :</label>
@@ -143,6 +147,14 @@
               <div id="pjFields">
                 <!-- Campos Pessoa Jurídica -->
                 <div class="input-group">
+                  <label for="nomePJ">Nome do(a) Profissional:</label>
+                  <input type="text" id="nomePJ" name="nome_pj" required />
+                </div>
+                <div class="input-group">
+                  <label for="nomeSocialPJ">Nome Social:</label>
+                  <input type="text" id="nomeSocialPJ" name="nome_social_pj" />
+                </div>
+                <div class="input-group">
                   <label for="razao_social">Razão Social:</label>
                   <input type="text" id="razaoSocial" name="razao_social" required />
                 </div>
@@ -173,8 +185,8 @@
                   <input type="text" id="bairro_pj" name="bairro_pj" required />
                 </div>
                 <div class="input-group">
-                  <label for="rua">Rua/Av:</label>
-                  <input type="text" id="rua" name="rua" required />
+                  <label for="ruaPJ">Rua/Av:</label>
+                  <input type="text" id="ruaPJ" name="rua_pj" required />
                 </div>
                 <div class="input-group">
                   <label for="cep_pj">CEP:</label>
@@ -224,16 +236,68 @@
             </a>
           </div>
 
-         
+          <div id="solicitacaoResult" class="result hidden">
+            <h2>Solicitação de Receituário</h2>
+            <p>
+              Protocolo: <b id="protocoloLabel">—</b>
+              &nbsp;|&nbsp; Status: <span id="statusLabel">—</span>
+            </p>
+
+            <p>
+              <a id="downloadAutorizacaoBtn" download="autorizacao.pdf">
+                <button type="button">Baixar Autorização Oficial (PDF)</button>
+              </a>
+            </p>
+
+            <fieldset>
+              <legend>Documentos</legend>
+              <div id="documentosList">
+                <div class="input-group" data-doc-tipo="crm_frente">
+                  <label>CRM (frente):</label>
+                  <input type="file" class="documentoInput" accept=".pdf,.jpg,.jpeg,.png" />
+                  <span class="documentoStatus">Nenhum arquivo enviado</span>
+                </div>
+                <div class="input-group" data-doc-tipo="crm_verso">
+                  <label>CRM (verso):</label>
+                  <input type="file" class="documentoInput" accept=".pdf,.jpg,.jpeg,.png" />
+                  <span class="documentoStatus">Nenhum arquivo enviado</span>
+                </div>
+                <div class="input-group" data-doc-tipo="comprovante_endereco">
+                  <label>Comprovante/Declaração de endereço:</label>
+                  <input type="file" class="documentoInput" accept=".pdf,.jpg,.jpeg,.png" />
+                  <span class="documentoStatus">Nenhum arquivo enviado</span>
+                </div>
+                <div class="input-group" data-doc-tipo="cartao_cnpj">
+                  <label>Cartão CNPJ (Pessoa Jurídica):</label>
+                  <input type="file" class="documentoInput" accept=".pdf,.jpg,.jpeg,.png" />
+                  <span class="documentoStatus">Nenhum arquivo enviado</span>
+                </div>
+                <div class="input-group" data-doc-tipo="certificado_regularidade">
+                  <label>Certificado de regularidade (Pessoa Jurídica):</label>
+                  <input type="file" class="documentoInput" accept=".pdf,.jpg,.jpeg,.png" />
+                  <span class="documentoStatus">Nenhum arquivo enviado</span>
+                </div>
+                <div class="input-group" data-doc-tipo="outro">
+                  <label>Outro documento:</label>
+                  <input type="file" class="documentoInput" accept=".pdf,.jpg,.jpeg,.png" />
+                  <span class="documentoStatus">Nenhum arquivo enviado</span>
+                </div>
+              </div>
+            </fieldset>
+
+            <p>
+              <button type="button" id="enviarSolicitacaoBtn">Enviar Solicitação</button>
+              <button type="button" id="baixarZipBtn">Baixar processo completo (ZIP)</button>
+              <button type="button" id="baixarPdfUnicoBtn">Gerar processo em PDF único</button>
+            </p>
+          </div>
         </div>
       </div>
     </div>
 
     <button id="installBtn">Instalar App</button>
-    <script type="module" src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script type="module" src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js"></script>
-    <script type="module" src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js"></script>
     <script src="js/main.js"></script>
+    <script type="module" src="js/formularioController.js"></script>
   </body>
 </html>
 
