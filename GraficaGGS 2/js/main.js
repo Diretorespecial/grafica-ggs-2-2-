@@ -144,7 +144,7 @@ $(document).ready(function () {
       nome = $("#razaoSocial").val();
       crm = $("#crmPJ").val();
       especialidade = $("#especialidadePJ").val();
-      rua = $("#rua").val();
+      rua = $("#ruaPJ").val();
       endereco = $("#enderecoPJ").val();
       telefone = $("#telefonePJ").val();
       bairro = $("#bairro_pj").val();

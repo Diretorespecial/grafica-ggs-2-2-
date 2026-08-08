@@ -1,0 +1,112 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Teste — preenchimento da autorização oficial</title>
+  </head>
+  <body>
+    <h1>Teste manual: fillAuthorizationPdf</h1>
+    <p>Dados fictícios da seção 15 do pedido (MÉDICO TESTE / CLÍNICA TESTE LTDA).</p>
+    <pre id="log"></pre>
+    <embed id="pdfPreview" type="application/pdf" width="100%" height="800" />
+
+    <script type="module">
+      import { fillAuthorizationPdf } from "./js/pdfAuthorizationService.js";
+      import { NEVER_FILL } from "./js/pdfFieldMap.js";
+      import { PDFDocument } from "https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/+esm";
+
+      const log = document.getElementById("log");
+      function print(line) { log.textContent += line + "\n"; }
+
+      const profissionalPF = {
+        nome: "MEDICO TESTE",
+        nomeSocial: "MEDICO TESTE SOCIAL",
+        crm: "CRM-MG 99999",
+        especialidade: "CLINICA MEDICA",
+        telefone: "(31) 99999-9999",
+        rua: "RUA TESTE",
+        numero: "100",
+        complemento: "SALA 101",
+        bairro: "CENTRO",
+        cidade: "BELO HORIZONTE",
+        cep: "30000-000",
+        estado: "MG",
+      };
+
+      const estabelecimentoPJ = {
+        razaoSocial: "CLINICA TESTE LTDA",
+        cnpj: "00.000.000/0001-00",
+        telefone: "(31) 99999-9999",
+        rua: "RUA TESTE",
+        numero: "100",
+        complemento: "SALA 101",
+        bairro: "CENTRO",
+        cidade: "BELO HORIZONTE",
+        cep: "30000-000",
+        estado: "MG",
+        crm: "CRM-MG 99999",
+        especialidade: "CLINICA MEDICA",
+      };
+
+      async function run() {
+        try {
+          print("Gerando PDF com dados PF + estabelecimento PJ + tipo_amarelo...");
+          const bytes = await fillAuthorizationPdf({
+            profissional: profissionalPF,
+            estabelecimento: estabelecimentoPJ,
+            receituarios: ["tipo_amarelo"],
+          });
+          print(`OK — ${bytes.length} bytes gerados.`);
+
+          const blob = new Blob([bytes], { type: "application/pdf" });
+          document.getElementById("pdfPreview").src = URL.createObjectURL(blob);
+
+          // Reabre o PDF gerado e confere: campos esperados preenchidos,
+          // campos da lista NEVER_FILL continuam vazios.
+          const reopened = await PDFDocument.load(bytes);
+          const form = reopened.getForm();
+          const fields = form.getFields();
+          print(`\nTotal de campos no PDF: ${fields.length}\n`);
+
+          print("--- Todos os campos e valores ---");
+          fields.forEach((f) => {
+            const name = f.getName();
+            let value = "(não é campo de texto/checkbox)";
+            try {
+              if (typeof f.getText === "function") value = JSON.stringify(f.getText());
+              else if (typeof f.isChecked === "function") value = f.isChecked() ? "MARCADO" : "desmarcado";
+            } catch (e) { value = `erro: ${e.message}`; }
+            print(`${name.padEnd(6)} = ${value}`);
+          });
+
+          print("\n--- Verificação: campos NEVER_FILL devem estar vazios/desmarcados ---");
+          let algumErro = false;
+          NEVER_FILL.forEach((name) => {
+            const field = fields.find((f) => f.getName() === name);
+            if (!field) { print(`${name}: (campo não encontrado no PDF — ok, nada preenchido)`); return; }
+            try {
+              if (typeof field.getText === "function") {
+                const v = field.getText();
+                const ok = !v || v.length === 0;
+                print(`${name}: texto="${v}" ${ok ? "OK (vazio)" : "*** ERRO: DEVERIA ESTAR VAZIO ***"}`);
+                if (!ok) algumErro = true;
+              } else if (typeof field.isChecked === "function") {
+                const checked = field.isChecked();
+                print(`${name}: ${checked ? "*** ERRO: MARCADO (deveria estar desmarcado) ***" : "desmarcado OK"}`);
+                if (checked) algumErro = true;
+              }
+            } catch (e) {
+              print(`${name}: erro ao ler (${e.message})`);
+            }
+          });
+
+          print(algumErro ? "\nRESULTADO: FALHOU — algum campo protegido foi preenchido." : "\nRESULTADO: OK — nenhum campo da área VISA/assinatura final foi tocado.");
+        } catch (err) {
+          print("ERRO: " + err.message);
+          console.error(err);
+        }
+      }
+
+      run();
+    </script>
+  </body>
+</html>

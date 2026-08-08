@@ -1,0 +1,83 @@
+rules_version = '2';
+
+// Regras do Firestore para o fluxo de Solicitação de Receituário / Autorização.
+//
+// IMPORTANTE: este projeto é um site estático (sem Cloud Functions / Admin SDK),
+// então não existe custom claim de admin. O papel de administrador é resolvido
+// por uma allowlist manual em admins/{uid}, criada à mão no Console do Firebase
+// (Firestore Database > admins > novo documento com ID = UID do usuário admin).
+//
+// Deploy: não há Firebase CLI neste ambiente. Cole o conteúdo deste arquivo em
+// Firebase Console > Firestore Database > Regras > publicar.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn() &&
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    function isOwner(data) {
+      return isSignedIn() && data.ownerUid == request.auth.uid;
+    }
+
+    // Allowlist de administradores. Somente leitura do próprio doc (para a UI
+    // decidir se mostra o link "Admin"); escrita só é feita manualmente no Console.
+    match /admins/{uid} {
+      allow read: if isSignedIn() && request.auth.uid == uid;
+      allow write: if false;
+    }
+
+    // Um documento por ano (contadores/2026, contadores/2027, ...). A regra só
+    // permite incrementar em exatamente 1 por escrita, fechando a possibilidade
+    // de um usuário autenticado zerar ou adulterar o contador.
+    match /contadores/{ano} {
+      allow read: if false;
+      allow create: if isSignedIn() && request.resource.data.value == 1;
+      allow update: if isSignedIn() &&
+        request.resource.data.value == resource.data.value + 1;
+      allow delete: if false;
+    }
+
+    match /solicitacoes/{protocolo} {
+      allow create: if isSignedIn()
+        && request.resource.data.ownerUid == request.auth.uid
+        && request.resource.data.status == "RASCUNHO";
+
+      allow read: if isOwner(resource.data) || isAdmin();
+
+      // O dono só pode editar enquanto a solicitação está em um status "seu"
+      // (rascunho / aguardando documentos / pendência), e só pode avançar até
+      // status ainda não administrativos. Qualquer transição de análise em
+      // diante (EM ANALISE, PROTOCOLADO NA VISA, ...) exige admin.
+      allow update: if isAdmin() || (
+        isOwner(resource.data) &&
+        request.resource.data.ownerUid == resource.data.ownerUid &&
+        request.resource.data.protocolo == resource.data.protocolo &&
+        resource.data.status in ["RASCUNHO", "AGUARDANDO DOCUMENTOS", "PENDENCIA"] &&
+        request.resource.data.status in ["RASCUNHO", "AGUARDANDO DOCUMENTOS", "DOCUMENTACAO RECEBIDA"]
+      );
+
+      allow delete: if false;
+
+      match /documentos/{docId} {
+        allow read, create, update: if isSignedIn() && (
+          get(/databases/$(database)/documents/solicitacoes/$(protocolo)).data.ownerUid == request.auth.uid ||
+          isAdmin()
+        );
+        allow delete: if false;
+      }
+
+      match /historico/{eventId} {
+        allow read, create: if isSignedIn() && (
+          get(/databases/$(database)/documents/solicitacoes/$(protocolo)).data.ownerUid == request.auth.uid ||
+          isAdmin()
+        );
+        allow update, delete: if false;
+      }
+    }
+  }
+}
