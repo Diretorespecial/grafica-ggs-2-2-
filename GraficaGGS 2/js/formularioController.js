@@ -1,10 +1,18 @@
-// Cola o fluxo novo (Solicitação -> Autorização oficial em PDF -> documentos ->
-// ZIP/PDF único) em cima do formulário existente, sem tocar na lógica de
+// Cola o fluxo novo (Solicitação -> Autorização oficial em PDF -> ZIP/PDF
+// único) em cima do formulário existente, sem tocar na lógica de
 // procuração/requisição/receituário de js/main.js. Este arquivo registra seu
 // próprio handler em #generateDoc (jQuery aceita múltiplos handlers no mesmo
 // evento); ele roda depois do handler de main.js porque este é um script
 // clássico (executa primeiro) e formularioController.js é um module (deferred).
-import { whenAuthenticated } from "./authGuard.js";
+//
+// Tudo fica no Firestore (sem Firebase Storage, que exige plano pago) — os
+// PDFs gerados são guardados como base64. Documentos do profissional (CRM,
+// comprovante etc.) continuam indo por WhatsApp, como no fluxo original.
+//
+// Sem login: o cliente entra direto (vindo da vitrine em index.html) e uma
+// sessão anônima do Firebase é criada nos bastidores, só para as regras de
+// segurança do Firestore terem um dono para o pedido.
+import { whenReady as whenAuthenticated } from "./anonAuth.js";
 import { WHATSAPP_DISPLAY } from "./whatsapp.js";
 import { fillAuthorizationPdf } from "./pdfAuthorizationService.js";
 import { mergeProcesso } from "./pdfMergeService.js";
@@ -12,11 +20,10 @@ import { buildProcessoZip } from "./zipService.js";
 import {
   allocateSolicitacao,
   updateDraft,
-  uploadGeneratedArtifact,
-  uploadDocumento,
+  saveGeneratedArtifact,
+  getArtifact,
   getSolicitacao,
-  listDocumentos,
-  getDownloadUrlFor,
+  base64ToBytes,
 } from "./requestService.js";
 
 const DRAFT_KEY = "ggs_draft_protocolo";
@@ -30,6 +37,12 @@ $(document).ready(function () {
 
   if (protocoloAtual) {
     restaurarRascunho(protocoloAtual);
+  } else {
+    // Cliente veio da vitrine já com um produto escolhido (Formulario.html?tipo=tipo_b)
+    const tipoEscolhido = new URLSearchParams(window.location.search).get("tipo");
+    if (tipoEscolhido) {
+      $(`input[name='receituario'][value='${tipoEscolhido}']`).prop("checked", true).trigger("change");
+    }
   }
 
   async function restaurarRascunho(protocolo) {
@@ -45,6 +58,15 @@ $(document).ready(function () {
       $("#statusLabel").text(solicitacao.status);
       $(".results").removeClass("hidden");
       $("#solicitacaoResult").removeClass("hidden");
+
+      if (solicitacao.temAutorizacao) {
+        const artefato = await getArtifact(protocolo, "autorizacao");
+        if (artefato) {
+          autorizacaoBytesAtual = base64ToBytes(artefato.base64);
+          const blob = new Blob([autorizacaoBytesAtual], { type: artefato.mimeType });
+          $("#downloadAutorizacaoBtn").attr("href", URL.createObjectURL(blob));
+        }
+      }
     } catch (err) {
       console.error("Não foi possível restaurar o rascunho:", err);
     }
@@ -188,7 +210,7 @@ $(document).ready(function () {
         receituarios: [tipo],
       });
 
-      await uploadGeneratedArtifact(
+      await saveGeneratedArtifact(
         protocoloAtual, "autorizacao", autorizacaoBytesAtual, "application/pdf", "autorizacao.pdf", usuario
       );
 
@@ -203,63 +225,39 @@ $(document).ready(function () {
     }
   });
 
-  $(document).on("change", ".documentoInput", async function () {
-    const file = this.files[0];
-    const input = this;
-    if (!file) return;
-
-    if (!protocoloAtual) {
-      alert("Clique em \"Gerar documentos\" antes de enviar documentos anexos.");
-      input.value = "";
-      return;
-    }
-
-    const tipo = $(this).closest("[data-doc-tipo]").data("doc-tipo");
-    const statusSpan = $(this).siblings(".documentoStatus");
-    const usuario = await whenAuthenticated;
-
-    statusSpan.text("Enviando...");
-    try {
-      await uploadDocumento(protocoloAtual, tipo, tipo, file, usuario);
-      statusSpan.text(`Enviado: ${file.name}`);
-    } catch (err) {
-      console.error("Erro ao enviar documento:", err);
-      statusSpan.text(err.message || "Erro ao enviar — tente novamente");
-      input.value = "";
-    }
-  });
-
   $("#enviarSolicitacaoBtn").click(async function () {
     if (!protocoloAtual) {
-      alert("Gere a autorização antes de enviar a solicitação.");
+      alert("Gere a autorização antes de confirmar o pedido.");
       return;
     }
-    await updateDraft(protocoloAtual, { status: "AGUARDANDO DOCUMENTOS" });
-    $("#statusLabel").text("AGUARDANDO DOCUMENTOS");
-    alert(`Solicitação ${protocoloAtual} enviada. A Gráfica GGS vai analisar os documentos.`);
+    const usuario = await whenAuthenticated;
+    try {
+      await updateDraft(protocoloAtual, { status: "AGUARDANDO DOCUMENTOS" });
+      $("#statusLabel").text("AGUARDANDO DOCUMENTOS");
+      alert(`Pedido ${protocoloAtual} confirmado! Envie seus documentos pelo WhatsApp ${WHATSAPP_DISPLAY} para seguir com a análise.`);
+    } catch (err) {
+      console.error("Erro ao confirmar pedido:", err);
+      alert("Não foi possível confirmar o pedido agora. Tente de novo em instantes.");
+    }
   });
 
   $("#baixarZipBtn").click(async function () {
     if (!validarProcessoCompleto()) return;
-    const documentos = await coletarDocumentosParaProcesso(protocoloAtual);
     const blob = await buildProcessoZip({
       protocolo: protocoloAtual,
       procuracaoBytes: procuracaoBytesAtual,
       procuracaoMimeType: "image/jpeg",
       autorizacaoPdfBytes: autorizacaoBytesAtual,
-      documentos,
     });
     baixarBlob(blob, `${protocoloAtual}.zip`);
   });
 
   $("#baixarPdfUnicoBtn").click(async function () {
     if (!validarProcessoCompleto()) return;
-    const documentos = await coletarDocumentosParaProcesso(protocoloAtual);
     const bytes = await mergeProcesso({
       procuracaoBytes: procuracaoBytesAtual,
       procuracaoMimeType: "image/jpeg",
       autorizacaoPdfBytes: autorizacaoBytesAtual,
-      documentos,
     });
     baixarBlob(new Blob([bytes], { type: "application/pdf" }), `${protocoloAtual}-processo.pdf`);
   });
@@ -270,19 +268,6 @@ $(document).ready(function () {
       return false;
     }
     return true;
-  }
-
-  async function coletarDocumentosParaProcesso(protocolo) {
-    const documentos = await listDocumentos(protocolo);
-    const resultados = [];
-    for (const documento of documentos) {
-      const versao = documento.versions?.[documento.versions.length - 1];
-      if (!versao) continue;
-      const url = await getDownloadUrlFor(versao.storagePath);
-      const bytes = new Uint8Array(await fetch(url).then((r) => r.arrayBuffer()));
-      resultados.push({ bytes, mimeType: versao.mimeType, fileName: versao.fileName });
-    }
-    return resultados;
   }
 
   function baixarBlob(blob, fileName) {

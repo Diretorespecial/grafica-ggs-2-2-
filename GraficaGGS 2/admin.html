@@ -3,14 +3,19 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Painel Administrativo — Gráfica GGS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Montserrat:wght@400;700;800&display=swap" rel="stylesheet">
     <link rel="icon" type="image/png" href="images/favicon.png" />
     <link rel="stylesheet" href="css/main.css" />
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <style>
       table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-      th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #eee; }
-      .pendencia { color: #c0392b; font-weight: bold; }
-      #detailView > div { margin-bottom: 20px; }
+      th { text-align: left; padding: 10px 12px; font-family: 'Montserrat', sans-serif; font-size: 0.8em; text-transform: uppercase; letter-spacing: 0.03em; color: var(--color-ink-soft); border-bottom: 2px solid var(--color-border); }
+      td { text-align: left; padding: 12px; border-bottom: 1px solid var(--color-border); }
+      tr:hover td { background: var(--color-bg); }
+      #detailView > .conatiner > div { margin-bottom: 24px; }
+      #detailHistorico, #detailDocumentos { padding-left: 18px; }
     </style>
   </head>
   <body>
@@ -19,6 +24,17 @@
     </div>
 
     <div class="row" style="max-width: 1100px;">
+      <div id="loginGate" class="hidden">
+        <div class="result" style="max-width: 360px; margin: 40px auto; text-align: center;">
+          <h2>Painel Administrativo</h2>
+          <p>Faça login com sua conta Google de administrador.</p>
+          <button type="button" id="loginAdminBtn" class="btn-primary" style="display:flex; align-items:center; justify-content:center; gap:10px;">
+            <img src="images/google.png" alt="" style="width:18px;height:18px;" />
+            Login com Google
+          </button>
+        </div>
+      </div>
+
       <div id="accessDenied" class="hidden">
         <div class="result">
           <h2>Acesso restrito</h2>
@@ -53,7 +69,7 @@
             <p><a href="admin.html">&larr; Voltar para a lista</a></p>
             <h1>Solicitação <span id="detailProtocolo"></span></h1>
             <p>
-              Status: <b id="detailStatus"></b> &nbsp;|&nbsp;
+              Status: <span class="statusBadge" id="detailStatus"></span> &nbsp;|&nbsp;
               Tipo: <span id="detailTipoPessoa"></span> &nbsp;|&nbsp;
               Receituário(s): <span id="detailReceituarios"></span>
             </p>
@@ -68,15 +84,9 @@
               <div id="detailEstabelecimento"></div>
             </div>
 
-            <div>
-              <h3>Documentos gerados</h3>
-              <a id="procuracaoLink" class="hidden" target="_blank"><button type="button">Baixar Procuração</button></a>
-              <a id="autorizacaoLink" class="hidden" target="_blank"><button type="button">Baixar Autorização Oficial</button></a>
-            </div>
-
-            <div>
-              <h3>Documentos enviados</h3>
-              <ul id="detailDocumentos"></ul>
+            <div class="actionsRow">
+              <a id="procuracaoLink" class="hidden"><button type="button" class="btn-secondary">Baixar Procuração</button></a>
+              <a id="autorizacaoLink" class="hidden"><button type="button" class="btn-secondary">Baixar Autorização Oficial</button></a>
             </div>
 
             <div>
@@ -85,20 +95,16 @@
             </div>
 
             <div>
-              <h3>Alterar status / Pendência</h3>
+              <h3>Alterar status</h3>
               <div class="input-group">
                 <label for="statusSelect">Novo status:</label>
                 <select id="statusSelect"></select>
               </div>
               <div class="input-group">
-                <label for="pendenciaDocSelect">Documento em pendência (se aplicável):</label>
-                <select id="pendenciaDocSelect"></select>
-              </div>
-              <div class="input-group">
                 <label for="observacaoInput">Observação:</label>
                 <input type="text" id="observacaoInput" placeholder="Ex: É necessário enviar um novo comprovante de endereço." />
               </div>
-              <button type="button" id="salvarStatusBtn">Salvar</button>
+              <button type="button" id="salvarStatusBtn" class="btn-primary">Salvar</button>
             </div>
           </div>
         </div>

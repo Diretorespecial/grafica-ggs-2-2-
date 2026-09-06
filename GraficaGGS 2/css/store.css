@@ -1,0 +1,351 @@
+/* Estilos da vitrine (index.html) — usa as variáveis definidas em main.css */
+
+body { padding-bottom: 0; overflow-x: hidden; }
+
+.storeTopbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 24px;
+  background: #fff;
+  box-shadow: var(--shadow-card);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.storeTopbar__logo { height: 44px; }
+
+.storeTopbar__whats {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 700;
+  font-size: 0.9em;
+  color: var(--color-ink);
+  text-decoration: none;
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: var(--color-bg);
+  transition: background 0.2s ease;
+}
+
+.storeTopbar__whats:hover { background: #e9ecf5; }
+.storeTopbar__whats svg { color: #25D366; flex-shrink: 0; }
+
+/* ======= Hero ======= */
+.storeHero {
+  position: relative;
+  overflow: hidden;
+  padding: 72px 24px;
+}
+
+.storeHero__blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.35;
+  z-index: 0;
+}
+
+.storeHero__blob--1 {
+  width: 420px; height: 420px;
+  top: -180px; left: -120px;
+  background: linear-gradient(135deg, var(--color-blue), var(--color-purple));
+}
+
+.storeHero__blob--2 {
+  width: 380px; height: 380px;
+  bottom: -200px; right: -100px;
+  background: linear-gradient(135deg, var(--color-pink), var(--color-yellow));
+}
+
+.storeHero__inner {
+  position: relative;
+  z-index: 1;
+  max-width: 1000px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 40px;
+  align-items: center;
+}
+
+.storeHero__eyebrow {
+  display: inline-block;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 700;
+  font-size: 0.78em;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-pink);
+  background: #fff0f7;
+  padding: 5px 12px;
+  border-radius: 999px;
+  margin-bottom: 16px;
+}
+
+.storeHero__text h1 {
+  font-size: 2.3em;
+  margin: 0 0 16px;
+  line-height: 1.2;
+}
+
+.storeHero__text p {
+  color: var(--color-ink-soft);
+  font-size: 1.05em;
+  line-height: 1.6;
+  margin: 0 0 28px;
+  max-width: 480px;
+}
+
+.storeHero__cta {
+  display: inline-block;
+  width: auto;
+  padding: 16px 40px;
+  text-decoration: none;
+}
+
+.storeHero__visual {
+  display: flex;
+  justify-content: center;
+}
+
+.storeHero__doc {
+  width: 220px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: var(--shadow-card-hover);
+  padding: 24px 22px;
+  transform: rotate(3deg);
+  position: relative;
+}
+
+.storeHero__docLine {
+  height: 10px;
+  border-radius: 6px;
+  background: var(--color-bg);
+  margin-bottom: 12px;
+}
+
+.storeHero__docLine--title {
+  width: 60%;
+  height: 14px;
+  background: var(--gradient-brand);
+}
+
+.storeHero__docLine--short { width: 40%; }
+
+.storeHero__docStamp {
+  margin-top: 18px;
+  display: inline-block;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 800;
+  font-size: 0.75em;
+  color: #17a24a;
+  border: 2px solid #17a24a;
+  border-radius: 8px;
+  padding: 4px 10px;
+  transform: rotate(-6deg);
+}
+
+/* ======= Como funciona ======= */
+.storeSteps {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 8px 24px 56px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 24px;
+}
+
+.storeStep {
+  text-align: center;
+  padding: 0 12px;
+}
+
+.storeStep__num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--gradient-brand);
+  color: #fff;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 800;
+  margin-bottom: 14px;
+}
+
+.storeStep h3 {
+  margin: 0 0 8px;
+  font-size: 1.05em;
+}
+
+.storeStep p {
+  margin: 0;
+  color: var(--color-ink-soft);
+  font-size: 0.9em;
+  line-height: 1.5;
+}
+
+/* ======= Products ======= */
+.storeProducts {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 32px 24px 56px;
+}
+
+.storeProducts h2 {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.storeGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 18px;
+}
+
+.storeCard {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  background: #fff;
+  border: 1.5px solid var(--color-border);
+  border-top: 4px solid var(--accent, var(--color-ink));
+  border-radius: 16px;
+  padding: 24px 20px;
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.storeCard:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-card-hover);
+}
+
+.storeCard__badge {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--accent, var(--color-ink));
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 800;
+  font-size: 1.1em;
+  margin-bottom: 4px;
+}
+
+.storeCard h3 {
+  margin: 0;
+  font-size: 1.15em;
+}
+
+.storeCard p {
+  margin: 0;
+  color: var(--color-ink-soft);
+  font-size: 0.9em;
+}
+
+.storeCard__priceLabel {
+  margin-top: 10px;
+  font-size: 0.72em;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-ink-soft);
+  font-weight: 700;
+}
+
+.storeCard strong {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 1.3em;
+  margin-top: 0;
+}
+
+.storeCard__cta {
+  margin-top: 14px;
+  width: 100%;
+  text-align: center;
+  padding: 10px;
+  border-radius: 10px;
+  background: var(--gradient-brand);
+  color: #fff;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 700;
+  font-size: 0.9em;
+}
+
+/* ======= Benefits ======= */
+.storeBenefits {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 24px 24px 64px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 20px;
+}
+
+.storeBenefits > div {
+  text-align: center;
+  padding: 20px;
+}
+
+.storeBenefits__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: var(--color-bg);
+  color: var(--color-pink);
+  margin-bottom: 14px;
+}
+
+.storeBenefits__icon svg { width: 24px; height: 24px; }
+
+.storeBenefits p {
+  margin: 0;
+  color: var(--color-ink-soft);
+  font-size: 0.9em;
+  line-height: 1.4;
+}
+
+/* ======= Footer ======= */
+.storeFooter {
+  text-align: center;
+  padding: 32px 24px;
+  color: var(--color-ink-soft);
+  font-size: 0.85em;
+  border-top: 1px solid var(--color-border);
+  background: var(--color-bg);
+}
+
+.storeFooter__logo {
+  height: 32px;
+  opacity: 0.8;
+  margin-bottom: 12px;
+}
+
+.storeFooter b { color: var(--color-ink); }
+.storeFooter__fine { font-size: 0.85em; opacity: 0.7; margin-top: 4px; }
+
+@media screen and (max-width: 760px) {
+  .storeHero__inner { grid-template-columns: 1fr; text-align: center; }
+  .storeHero__text p { margin-left: auto; margin-right: auto; }
+  .storeHero__visual { order: -1; }
+  .storeHero__doc { transform: none; }
+}
+
+@media screen and (max-width: 600px) {
+  .storeHero__text h1 { font-size: 1.7em; }
+  .storeHero { padding: 40px 20px; }
+}

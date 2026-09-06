@@ -7,6 +7,9 @@ rules_version = '2';
 // por uma allowlist manual em admins/{uid}, criada à mão no Console do Firebase
 // (Firestore Database > admins > novo documento com ID = UID do usuário admin).
 //
+// Sem Firebase Storage de propósito (exige plano pago Blaze): os PDFs gerados
+// ficam em base64 na subcoleção "arquivos", por isso o limite de tamanho abaixo.
+//
 // Deploy: não há Firebase CLI neste ambiente. Cole o conteúdo deste arquivo em
 // Firebase Console > Firestore Database > Regras > publicar.
 service cloud.firestore {
@@ -31,11 +34,14 @@ service cloud.firestore {
       allow write: if false;
     }
 
-    // Um documento por ano (contadores/2026, contadores/2027, ...). A regra só
-    // permite incrementar em exatamente 1 por escrita, fechando a possibilidade
-    // de um usuário autenticado zerar ou adulterar o contador.
+    // Um documento por ano (contadores/2026, contadores/2027, ...). A leitura
+    // precisa ser permitida para usuários autenticados porque a transação que
+    // aloca o protocolo (allocateSolicitacao) precisa ler o valor atual antes
+    // de decidir o próximo número — não é dado sensível, só uma contagem.
+    // A regra de escrita só permite incrementar em exatamente 1, fechando a
+    // possibilidade de um usuário autenticado zerar ou adulterar o contador.
     match /contadores/{ano} {
-      allow read: if false;
+      allow read: if isSignedIn();
       allow create: if isSignedIn() && request.resource.data.value == 1;
       allow update: if isSignedIn() &&
         request.resource.data.value == resource.data.value + 1;
@@ -63,11 +69,17 @@ service cloud.firestore {
 
       allow delete: if false;
 
-      match /documentos/{docId} {
-        allow read, create, update: if isSignedIn() && (
+      // Procuração/autorização geradas pelo app, guardadas como base64 (sem
+      // Storage). Tamanho limitado a ~900KB em texto para caber com folga no
+      // limite de 1 MiB por documento do Firestore.
+      match /arquivos/{kind} {
+        allow read: if isSignedIn() && (
           get(/databases/$(database)/documents/solicitacoes/$(protocolo)).data.ownerUid == request.auth.uid ||
           isAdmin()
         );
+        allow create, update: if isSignedIn() &&
+          get(/databases/$(database)/documents/solicitacoes/$(protocolo)).data.ownerUid == request.auth.uid &&
+          request.resource.data.base64.size() < 900000;
         allow delete: if false;
       }
 

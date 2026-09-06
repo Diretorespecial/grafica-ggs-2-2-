@@ -1,17 +1,17 @@
 self.addEventListener('install', (e) => {
   e.waitUntil(
-    caches.open('ggs-store-v2').then((cache) => {
+    caches.open('ggs-store-v3').then((cache) => {
       return cache.addAll([
         '/GraficaGGS%202/',
         '/GraficaGGS%202/index.html',
         '/GraficaGGS%202/Formulario.html',
         '/GraficaGGS%202/admin.html',
         '/GraficaGGS%202/css/main.css',
-        '/GraficaGGS%202/css/style.css',
+        '/GraficaGGS%202/css/store.css',
         '/GraficaGGS%202/js/main.js',
-        '/GraficaGGS%202/js/firebase.js',
         '/GraficaGGS%202/js/firebaseApp.js',
-        '/GraficaGGS%202/js/authGuard.js',
+        '/GraficaGGS%202/js/anonAuth.js',
+        '/GraficaGGS%202/js/adminAuth.js',
         '/GraficaGGS%202/js/whatsapp.js',
         '/GraficaGGS%202/js/pdfFieldMap.js',
         '/GraficaGGS%202/js/pdfAuthorizationService.js',
@@ -30,7 +30,7 @@ self.addEventListener('install', (e) => {
 self.addEventListener('activate', (e) => {
   e.waitUntil(
     caches.keys().then((keys) =>
-      Promise.all(keys.filter((key) => key !== 'ggs-store-v2').map((key) => caches.delete(key)))
+      Promise.all(keys.filter((key) => key !== 'ggs-store-v3').map((key) => caches.delete(key)))
     )
   );
 });

@@ -22,31 +22,44 @@ function changeavisosheight() {
 
 $(document).ready(function () {
 
-  // Alterar tipo de receituário
-  $(".radio").change(function () {
-    if ($(this).val() == "tipo_amarelo") {
-      $("#qtd").val("1").attr("disabled", true);
-      $("#valor").val("R$ 90,00");
+  // Selecionar tipo de receituário (visual do card + preço)
+  function atualizarValor() {
+    const tipo = $("input[name='receituario']:checked").val();
+    let valor = 100;
+    if (tipo === "tipo_amarelo") {
+      valor = 90;
     } else {
-      $("#qtd").attr("disabled", false);
+      switch ($("#qtd").val()) {
+        case "1": valor = 100; break;
+        case "2": valor = 120; break;
+        case "3": valor = 130; break;
+        case "4": valor = 140; break;
+        case "5": valor = 150; break;
+        case "6": valor = 170; break;
+        case "10": valor = 210; break;
+        case "20": valor = 260; break;
+      }
     }
+    const texto = "R$ " + valor + ",00";
+    $("#valor").val(texto);
+    $("#valorDisplay").text(texto);
+  }
+
+  $("input[name='receituario']").change(function () {
+    $(".productCard").removeClass("selected");
+    $(this).closest(".productCard").addClass("selected");
+
+    if ($(this).val() === "tipo_amarelo") {
+      $("#qtyRow").addClass("hidden");
+      $("#qtd").val("1");
+    } else {
+      $("#qtyRow").removeClass("hidden");
+    }
+    atualizarValor();
   });
 
   // Atualizar valor baseado na quantidade
-  $("#qtd").change(function () {
-    let valor = 0;
-    switch ($(this).val()) {
-      case "1": valor = 100; break;
-      case "2": valor = 120; break;
-      case "3": valor = 130; break;
-      case "4": valor = 140; break;
-      case "5": valor = 150; break;
-      case "6": valor = 170; break;
-      case "10": valor = 210; break;
-      case "20": valor = 260; break;
-    }
-    $("#valor").val("R$ " + valor + ",00");
-  });
+  $("#qtd").change(atualizarValor);
 
   // Botão copiar PITX
   $("#pitxbtn").click(function () {
