@@ -5,7 +5,7 @@
     <title>Formulário de Receituários</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Montserrat:wght@400;700;800&display=swap" rel="stylesheet">
     <link rel="icon" type="image/png" href="images/favicon.png" />
     <link rel="stylesheet" href="css/main.css" />
     <link rel="manifest" href="manifest.json">
@@ -16,10 +16,7 @@
     <div class="header">
       <img src="images/logo.png" alt="" />
       <div class="user">
-        <span id="message">Seja bem vindo</span>
-        <b><span id=></span></b>
-        <span>!</span>
-        <img id="pic" src="images/default_avatar.jpg" alt="" />
+        <a href="index.html" style="text-decoration:none; color:var(--color-ink-soft); font-weight:700; font-size:0.9em;">&larr; Voltar à loja</a>
       </div>
     </div>
 
@@ -44,7 +41,7 @@
 
       <div class="conatiner">
         <form action="index.html" method="post">
-          <h1>Formulário de Receituários</h1>
+          <h1>Peça seu receituário</h1>
 
           <div class="personType">
             <button type="button" id="fisica">Pessoa Física</button>
@@ -52,25 +49,61 @@
           </div>
 
           <fieldset>
-            <legend><span class="number"></span>Tipo de Receituário</legend>
-            <div class="radioDiv">
-              <label>
-                <input type="radio" name="receituario" value="retinoides" /> Retinóides
+            <legend>Escolha o tipo de receituário</legend>
+            <div class="productCards">
+              <label class="productCard" data-tipo="tipo_amarelo">
+                <input type="radio" name="receituario" value="tipo_amarelo" />
+                <span class="productCard__badge" style="--accent: var(--color-yellow)">A</span>
+                <span class="productCard__name">Amarelo</span>
+                <span class="productCard__desc">Notificação de Receita A</span>
+                <span class="productCard__price" data-fixedprice="90">R$ 90,00</span>
               </label>
-              <label>
-                <input class="radio" type="radio" name="receituario" value="tipo_b" /> B
+              <label class="productCard" data-tipo="tipo_b">
+                <input type="radio" name="receituario" value="tipo_b" />
+                <span class="productCard__badge" style="--accent: var(--color-blue)">B</span>
+                <span class="productCard__name">Tipo B</span>
+                <span class="productCard__desc">Notificação de Receita B</span>
+                <span class="productCard__price" data-baseprice>R$ 100,00</span>
               </label>
-              <label>
-                <input class="radio" type="radio" name="receituario" value="tipo_b2" /> B2
+              <label class="productCard" data-tipo="tipo_b2">
+                <input type="radio" name="receituario" value="tipo_b2" />
+                <span class="productCard__badge" style="--accent: var(--color-pink)">B2</span>
+                <span class="productCard__name">Tipo B2</span>
+                <span class="productCard__desc">Notificação de Receita B2</span>
+                <span class="productCard__price" data-baseprice>R$ 100,00</span>
               </label>
-              <label>
-                <input class="radio" type="radio" name="receituario" value="tipo_amarelo" /> Amarelo
+              <label class="productCard" data-tipo="retinoides">
+                <input type="radio" name="receituario" value="retinoides" />
+                <span class="productCard__badge" style="--accent: var(--color-ink)">R</span>
+                <span class="productCard__name">Retinóides</span>
+                <span class="productCard__desc">Notificação Especial</span>
+                <span class="productCard__price" data-baseprice>R$ 100,00</span>
               </label>
+            </div>
+
+            <div id="qtyRow" class="qtyRow hidden">
+              <label for="qtd">Quantidade de talonários:</label>
+              <select id="qtd" name="qtd">
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+                <option value="10">10</option>
+                <option value="20">20</option>
+              </select>
+            </div>
+
+            <div class="totalRow">
+              <span>Total estimado</span>
+              <strong id="valorDisplay">R$ 90,00</strong>
+              <input type="hidden" id="valor" value="R$ 90,00" />
             </div>
           </fieldset>
 
           <fieldset>
-            <legend><span class="number"></span>Informações</legend>
+            <legend>Suas informações</legend>
             <div class="form-group">
               <div id="pfFields">
                 <!-- Campos Pessoa Física -->
@@ -93,6 +126,10 @@
                 <div class="input-group">
                   <label for="telefone">Telefone:</label>
                   <input type="text" id="telefone" name="telefone" required />
+                </div>
+                <div class="input-group">
+                  <label for="cpf">CPF:</label>
+                  <input type="text" id="cpf" name="cpf" required />
                 </div>
                 <div class="input-group">
                   <label for="rg">RG:</label>
@@ -124,18 +161,9 @@
                   <label for="bairro">Bairro:</label>
                   <input type="text" id="bairro" name="bairro" required />
                 </div>
-
-                <div class="input-group">
-                  <label for="cpf">CPF:</label>
-                  <input type="text" id="cpf" name="cpf" required />
-                </div>
-                <div class="input-group">
-                  <label for="rg">RG:</label>
-                  <input type="text" id="rg" name="rg" required />
-                </div>
                 <hr>
                 <div class="input-group">
-                  <label for="endereco"><h4></h4>Endereço Residencial: (ex: Rua/Av, Bairro, Número, Cidade.)</h4></label>
+                  <label for="endereco">Endereço Residencial: (ex: Rua/Av, Bairro, Número, Cidade.)</label>
                   <input type="text" class="endereco" id="endereco" name="endereco" required />
                 </div>
                 <div class="input-group">
@@ -207,7 +235,7 @@
                   <label for="endereco_pj">Endereço: (ex: Rua/Av, Bairro, Número, Cidade.)</label>
                   <input type="text" class="endereco" id="enderecoPJ" name="endereco_pj" required />
                 </div>
-      
+
                 <hr>
                 <div class="input-group">
                   <label for="data">Data:</label>
@@ -232,64 +260,29 @@
             <img id="preview2" style="max-width: 300px; height: auto" />
             <br />
             <a id="downloadBtn2" download="imagem.png">
-              <button>Baixar Documento</button>
+              <button class="btn-secondary">Baixar Procuração</button>
             </a>
           </div>
 
           <div id="solicitacaoResult" class="result hidden">
-            <h2>Solicitação de Receituário</h2>
-            <p>
+            <h2>Pedido confirmado 🎉</h2>
+            <p style="text-align:center;">
               Protocolo: <b id="protocoloLabel">—</b>
-              &nbsp;|&nbsp; Status: <span id="statusLabel">—</span>
+              &nbsp;&nbsp;
+              <span class="statusBadge" id="statusLabel">—</span>
             </p>
 
-            <p>
+            <div class="actionsRow">
               <a id="downloadAutorizacaoBtn" download="autorizacao.pdf">
-                <button type="button">Baixar Autorização Oficial (PDF)</button>
+                <button type="button" class="btn-primary">Baixar Autorização Oficial</button>
               </a>
-            </p>
+            </div>
 
-            <fieldset>
-              <legend>Documentos</legend>
-              <div id="documentosList">
-                <div class="input-group" data-doc-tipo="crm_frente">
-                  <label>CRM (frente):</label>
-                  <input type="file" class="documentoInput" accept=".pdf,.jpg,.jpeg,.png" />
-                  <span class="documentoStatus">Nenhum arquivo enviado</span>
-                </div>
-                <div class="input-group" data-doc-tipo="crm_verso">
-                  <label>CRM (verso):</label>
-                  <input type="file" class="documentoInput" accept=".pdf,.jpg,.jpeg,.png" />
-                  <span class="documentoStatus">Nenhum arquivo enviado</span>
-                </div>
-                <div class="input-group" data-doc-tipo="comprovante_endereco">
-                  <label>Comprovante/Declaração de endereço:</label>
-                  <input type="file" class="documentoInput" accept=".pdf,.jpg,.jpeg,.png" />
-                  <span class="documentoStatus">Nenhum arquivo enviado</span>
-                </div>
-                <div class="input-group" data-doc-tipo="cartao_cnpj">
-                  <label>Cartão CNPJ (Pessoa Jurídica):</label>
-                  <input type="file" class="documentoInput" accept=".pdf,.jpg,.jpeg,.png" />
-                  <span class="documentoStatus">Nenhum arquivo enviado</span>
-                </div>
-                <div class="input-group" data-doc-tipo="certificado_regularidade">
-                  <label>Certificado de regularidade (Pessoa Jurídica):</label>
-                  <input type="file" class="documentoInput" accept=".pdf,.jpg,.jpeg,.png" />
-                  <span class="documentoStatus">Nenhum arquivo enviado</span>
-                </div>
-                <div class="input-group" data-doc-tipo="outro">
-                  <label>Outro documento:</label>
-                  <input type="file" class="documentoInput" accept=".pdf,.jpg,.jpeg,.png" />
-                  <span class="documentoStatus">Nenhum arquivo enviado</span>
-                </div>
-              </div>
-            </fieldset>
-
-            <p>
-              <button type="button" id="enviarSolicitacaoBtn">Enviar Solicitação</button>
-              <button type="button" id="baixarZipBtn">Baixar processo completo (ZIP)</button>
-              <button type="button" id="baixarPdfUnicoBtn">Gerar processo em PDF único</button>
-            </p>
+            <div class="actionsRow">
+              <button type="button" id="enviarSolicitacaoBtn" class="btn-secondary">Confirmar Pedido</button>
+              <button type="button" id="baixarZipBtn" class="btn-secondary">Baixar tudo (ZIP)</button>
+              <button type="button" id="baixarPdfUnicoBtn" class="btn-secondary">PDF único</button>
+            </div>
           </div>
         </div>
       </div>
@@ -300,12 +293,3 @@
     <script type="module" src="js/formularioController.js"></script>
   </body>
 </html>
-
-
-
-
-
-
-
-
-

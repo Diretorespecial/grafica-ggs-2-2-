@@ -1,16 +1,14 @@
-// CRUD de Solicitações (Firestore + Storage). Nenhuma lógica de PDF mora aqui —
-// este módulo só sabe gravar/ler dados e subir/baixar arquivos.
+// CRUD de Solicitações — 100% Firestore, sem Firebase Storage (o Storage exige
+// o plano pago Blaze; para manter o projeto gratuito, os PDFs gerados
+// (procuração/autorização) são guardados como texto base64 dentro do próprio
+// Firestore, num documento por artefato — cada um cabe tranquilo no limite de
+// 1 MiB por documento). Documentos enviados pelo profissional (CRM, comprovante
+// etc.) continuam indo por WhatsApp, como já era o fluxo original.
 import {
   collection, doc, getDoc, getDocs, setDoc, updateDoc, addDoc,
   query, where, orderBy, runTransaction, writeBatch, serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-firestore.js";
-import {
-  ref, uploadBytes, getDownloadURL,
-} from "https://www.gstatic.com/firebasejs/11.5.0/firebase-storage.js";
-import { db, storage } from "./firebaseApp.js";
-
-const ALLOWED_MIME_TYPES = ["application/pdf", "image/jpeg", "image/png"];
-const MAX_UPLOAD_BYTES = 15 * 1024 * 1024;
+import { db } from "./firebaseApp.js";
 
 export const STATUSES = [
   "RASCUNHO",
@@ -26,19 +24,20 @@ export const STATUSES = [
   "FINALIZADO",
 ];
 
-function assertValidUpload(file) {
-  if (!ALLOWED_MIME_TYPES.includes(file.type)) {
-    throw new Error(`Tipo de arquivo não permitido: ${file.type || "desconhecido"}. Envie PDF, JPG ou PNG.`);
+export function bytesToBase64(bytes) {
+  let binary = "";
+  const chunkSize = 0x8000;
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunkSize));
   }
-  if (file.size >= MAX_UPLOAD_BYTES) {
-    throw new Error("Arquivo maior que o limite de 15MB.");
-  }
+  return btoa(binary);
 }
 
-function extensionFor(mimeType) {
-  if (mimeType === "application/pdf") return "pdf";
-  if (mimeType === "image/png") return "png";
-  return "jpg";
+export function base64ToBytes(base64) {
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return bytes;
 }
 
 /**
@@ -64,10 +63,8 @@ export async function allocateSolicitacao(owner, initialData) {
       ownerEmail: owner.email || null,
       ownerNome: owner.displayName || null,
       status: "RASCUNHO",
-      arquivos: {
-        procuracao: { current: 0, versions: [] },
-        autorizacao: { current: 0, versions: [] },
-      },
+      temProcuracao: false,
+      temAutorizacao: false,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
       ...initialData,
@@ -88,11 +85,6 @@ export async function getSolicitacao(protocolo) {
   const snap = await getDoc(doc(db, "solicitacoes", protocolo));
   if (!snap.exists()) return null;
   return { id: snap.id, ...snap.data() };
-}
-
-export async function listDocumentos(protocolo) {
-  const snap = await getDocs(collection(db, "solicitacoes", protocolo, "documentos"));
-  return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
 }
 
 export async function listHistorico(protocolo) {
@@ -129,31 +121,25 @@ export async function addHistoricoEvent(protocolo, { usuarioUid, usuarioNome, ac
 }
 
 /**
- * Sobe um artefato GERADO pelo próprio sistema (procuração ou autorização) para
- * o Storage, versiona no documento da solicitação e registra no histórico.
+ * Salva um artefato GERADO pelo próprio sistema (procuração ou autorização)
+ * como base64 num documento próprio (solicitacoes/{protocolo}/arquivos/{kind}),
+ * substituindo a versão anterior (não guardamos histórico de versões desses
+ * dois arquivos — eles são sempre re-gerados a partir dos dados do formulário).
  * @param {"procuracao"|"autorizacao"} kind
  */
-export async function uploadGeneratedArtifact(protocolo, kind, bytes, mimeType, fileName, usuario) {
-  const solicitacao = await getSolicitacao(protocolo);
-  const currentVersion = solicitacao?.arquivos?.[kind]?.current || 0;
-  const nextVersion = currentVersion + 1;
-  const storagePath = `solicitacoes/${protocolo}/${kind}/v${nextVersion}.${extensionFor(mimeType)}`;
+export async function saveGeneratedArtifact(protocolo, kind, bytes, mimeType, fileName, usuario) {
+  const base64 = bytesToBase64(bytes);
 
-  const fileRef = ref(storage, storagePath);
-  await uploadBytes(fileRef, bytes, { contentType: mimeType });
-
-  const versionEntry = {
-    version: nextVersion,
-    storagePath,
-    fileName,
+  await setDoc(doc(db, "solicitacoes", protocolo, "arquivos", kind), {
+    base64,
     mimeType,
+    fileName,
     size: bytes.byteLength || bytes.length,
     generatedAt: new Date().toISOString(),
-  };
+  });
 
-  const versions = [...(solicitacao?.arquivos?.[kind]?.versions || []), versionEntry];
   await updateDoc(doc(db, "solicitacoes", protocolo), {
-    [`arquivos.${kind}`]: { current: nextVersion, versions },
+    [kind === "autorizacao" ? "temAutorizacao" : "temProcuracao"]: true,
     updatedAt: serverTimestamp(),
   });
 
@@ -162,69 +148,19 @@ export async function uploadGeneratedArtifact(protocolo, kind, bytes, mimeType, 
     usuarioNome: usuario.displayName,
     acao: kind === "autorizacao" ? "autorizacao_gerada" : "procuracao_gerada",
   });
-
-  return storagePath;
 }
 
-/**
- * Sobe um documento enviado pelo usuário (CRM, comprovante, etc), versionando
- * dentro do tipo (docId). O histórico de versões é mantido; a atual é a mais
- * recente. Ao substituir um documento que estava em pendência, a pendência é
- * limpa automaticamente.
- */
-export async function uploadDocumento(protocolo, docId, tipo, file, usuario) {
-  assertValidUpload(file);
-
-  const docRef = doc(db, "solicitacoes", protocolo, "documentos", docId);
-  const existing = await getDoc(docRef);
-  const currentVersion = existing.exists() ? existing.data().currentVersion || 0 : 0;
-  const nextVersion = currentVersion + 1;
-  const storagePath = `solicitacoes/${protocolo}/documentos/${docId}/v${nextVersion}.${extensionFor(file.type)}`;
-
-  const bytes = await file.arrayBuffer();
-  const fileRef = ref(storage, storagePath);
-  await uploadBytes(fileRef, bytes, { contentType: file.type });
-
-  const versionEntry = {
-    version: nextVersion,
-    storagePath,
-    fileName: file.name,
-    mimeType: file.type,
-    size: file.size,
-    uploadedAt: new Date().toISOString(),
-    uploadedByUid: usuario.uid,
-  };
-
-  const versions = existing.exists() ? [...(existing.data().versions || []), versionEntry] : [versionEntry];
-  await setDoc(docRef, {
-    tipo,
-    currentVersion: nextVersion,
-    status: "ok",
-    observacaoPendencia: null,
-    versions,
-  }, { merge: true });
-
-  await addHistoricoEvent(protocolo, {
-    usuarioUid: usuario.uid,
-    usuarioNome: usuario.displayName,
-    acao: "upload_documento",
-    observacao: `${tipo} (v${nextVersion})`,
-  });
-
-  return storagePath;
-}
-
-export async function getDownloadUrlFor(storagePath) {
-  return getDownloadURL(ref(storage, storagePath));
+export async function getArtifact(protocolo, kind) {
+  const snap = await getDoc(doc(db, "solicitacoes", protocolo, "arquivos", kind));
+  if (!snap.exists()) return null;
+  return snap.data();
 }
 
 /**
  * Muda o status da solicitação e registra o evento no histórico numa única
- * escrita atômica. Se `pendenciaDocId` for informado junto de status
- * "PENDENCIA", marca aquele documento específico como pendente com a
- * observação — assim o cliente sabe exatamente qual arquivo substituir.
+ * escrita atômica.
  */
-export async function setStatus(protocolo, novoStatus, { observacao = null, pendenciaDocId = null, usuario }) {
+export async function setStatus(protocolo, novoStatus, { observacao = null, usuario }) {
   const solicitacao = await getSolicitacao(protocolo);
   const statusAnterior = solicitacao?.status || null;
 
@@ -233,13 +169,6 @@ export async function setStatus(protocolo, novoStatus, { observacao = null, pend
     status: novoStatus,
     updatedAt: serverTimestamp(),
   });
-
-  if (novoStatus === "PENDENCIA" && pendenciaDocId) {
-    batch.set(doc(db, "solicitacoes", protocolo, "documentos", pendenciaDocId), {
-      status: "pendencia",
-      observacaoPendencia: observacao,
-    }, { merge: true });
-  }
 
   const historicoRef = doc(collection(db, "solicitacoes", protocolo, "historico"));
   batch.set(historicoRef, {

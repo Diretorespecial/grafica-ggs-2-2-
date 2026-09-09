@@ -1,18 +1,18 @@
 // Painel administrativo: lista de solicitações + detalhe (dados, arquivos,
-// documentos, histórico, mudança de status/pendência). A checagem de admin
-// feita aqui é só para a UI decidir o que mostrar — quem garante segurança de
-// verdade são as regras do Firestore/Storage (firestore.rules/storage.rules).
+// histórico, mudança de status). A checagem de admin feita aqui é só para a
+// UI decidir o que mostrar — quem garante segurança de verdade são as regras
+// do Firestore (firestore.rules).
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-firestore.js";
-import { whenAuthenticated } from "./authGuard.js";
+import { signInAdmin, whenAuthStateKnown } from "./adminAuth.js";
 import { db } from "./firebaseApp.js";
 import {
   STATUSES,
   listAllSolicitacoes,
   getSolicitacao,
-  listDocumentos,
+  getArtifact,
   listHistorico,
-  getDownloadUrlFor,
   setStatus,
+  base64ToBytes,
 } from "./requestService.js";
 
 const params = new URLSearchParams(window.location.search);
@@ -32,6 +32,14 @@ function renderPessoa(selector, pessoa) {
   );
 }
 
+async function attachArtifactLink(protocolo, kind, linkSelector) {
+  const artefato = await getArtifact(protocolo, kind);
+  if (!artefato) return;
+  const bytes = base64ToBytes(artefato.base64);
+  const blob = new Blob([bytes], { type: artefato.mimeType });
+  $(linkSelector).attr("href", URL.createObjectURL(blob)).attr("download", artefato.fileName).removeClass("hidden");
+}
+
 async function renderList() {
   $("#listView").removeClass("hidden");
   const solicitacoes = await listAllSolicitacoes();
@@ -39,8 +47,8 @@ async function renderList() {
 
   solicitacoes.forEach((sol) => {
     const arquivos = [
-      sol.arquivos?.procuracao?.current ? "Procuração" : null,
-      sol.arquivos?.autorizacao?.current ? "Autorização" : null,
+      sol.temProcuracao ? "Procuração" : null,
+      sol.temAutorizacao ? "Autorização" : null,
     ].filter(Boolean).join(", ");
 
     tbody.append(`
@@ -78,29 +86,8 @@ async function renderDetail(protocolo, usuarioAdmin) {
     $("#estabelecimentoSection").addClass("hidden");
   }
 
-  const procuracaoVersoes = sol.arquivos?.procuracao?.versions || [];
-  if (procuracaoVersoes.length) {
-    const url = await getDownloadUrlFor(procuracaoVersoes[procuracaoVersoes.length - 1].storagePath);
-    $("#procuracaoLink").attr("href", url).removeClass("hidden");
-  }
-  const autorizacaoVersoes = sol.arquivos?.autorizacao?.versions || [];
-  if (autorizacaoVersoes.length) {
-    const url = await getDownloadUrlFor(autorizacaoVersoes[autorizacaoVersoes.length - 1].storagePath);
-    $("#autorizacaoLink").attr("href", url).removeClass("hidden");
-  }
-
-  const documentos = await listDocumentos(protocolo);
-  const docsList = $("#detailDocumentos").empty();
-  for (const documento of documentos) {
-    const versaoAtual = documento.versions?.[documento.versions.length - 1];
-    const url = versaoAtual ? await getDownloadUrlFor(versaoAtual.storagePath) : "#";
-    const pendenciaHtml = documento.status === "pendencia"
-      ? ` — <span class="pendencia">Pendência: ${documento.observacaoPendencia || ""}</span>`
-      : "";
-    docsList.append(
-      `<li><b>${documento.tipo}</b> (v${documento.currentVersion}) — <a href="${url}" target="_blank">baixar</a>${pendenciaHtml}</li>`
-    );
-  }
+  if (sol.temProcuracao) await attachArtifactLink(protocolo, "procuracao", "#procuracaoLink");
+  if (sol.temAutorizacao) await attachArtifactLink(protocolo, "autorizacao", "#autorizacaoLink");
 
   const historico = await listHistorico(protocolo);
   const histList = $("#detailHistorico").empty();
@@ -115,18 +102,11 @@ async function renderDetail(protocolo, usuarioAdmin) {
     statusSelect.append(`<option value="${status}" ${status === sol.status ? "selected" : ""}>${status}</option>`);
   });
 
-  const pendenciaDocSelect = $("#pendenciaDocSelect").empty();
-  pendenciaDocSelect.append(`<option value="">(nenhum documento específico)</option>`);
-  documentos.forEach((documento) => {
-    pendenciaDocSelect.append(`<option value="${documento.id}">${documento.tipo}</option>`);
-  });
-
   $("#salvarStatusBtn").off("click").on("click", async function () {
     const novoStatus = statusSelect.val();
     const observacao = $("#observacaoInput").val();
-    const pendenciaDocId = pendenciaDocSelect.val() || null;
     try {
-      await setStatus(protocolo, novoStatus, { observacao, pendenciaDocId, usuario: usuarioAdmin });
+      await setStatus(protocolo, novoStatus, { observacao, usuario: usuarioAdmin });
       alert("Status atualizado.");
       window.location.reload();
     } catch (err) {
@@ -136,15 +116,9 @@ async function renderDetail(protocolo, usuarioAdmin) {
   });
 }
 
-async function init() {
-  const usuario = await whenAuthenticated;
-  const adminSnap = await getDoc(doc(db, "admins", usuario.uid));
-
-  if (!adminSnap.exists()) {
-    $("#accessDenied").removeClass("hidden");
-    return;
-  }
-
+async function iniciarComoAdmin(usuario) {
+  $("#loginGate").addClass("hidden");
+  $("#accessDenied").addClass("hidden");
   $("#adminContent").removeClass("hidden");
 
   if (protocoloQuery) {
@@ -152,6 +126,38 @@ async function init() {
   } else {
     await renderList();
   }
+}
+
+async function init() {
+  const usuario = await whenAuthStateKnown();
+
+  if (!usuario) {
+    $("#loginGate").removeClass("hidden");
+    $("#loginAdminBtn").off("click").on("click", async function () {
+      try {
+        const cred = await signInAdmin();
+        const adminSnap = await getDoc(doc(db, "admins", cred.user.uid));
+        if (!adminSnap.exists()) {
+          $("#loginGate").addClass("hidden");
+          $("#accessDenied").removeClass("hidden");
+          return;
+        }
+        await iniciarComoAdmin(cred.user);
+      } catch (err) {
+        console.error("Erro ao fazer login:", err);
+        alert("Não foi possível fazer login. Tente de novo.");
+      }
+    });
+    return;
+  }
+
+  const adminSnap = await getDoc(doc(db, "admins", usuario.uid));
+  if (!adminSnap.exists()) {
+    $("#accessDenied").removeClass("hidden");
+    return;
+  }
+
+  await iniciarComoAdmin(usuario);
 }
 
 init();

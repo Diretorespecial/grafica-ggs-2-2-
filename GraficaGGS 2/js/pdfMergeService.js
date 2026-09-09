@@ -1,7 +1,7 @@
-// Junta procuração + autorização oficial (preenchida) + documentos anexados em
-// um único PDF, na ordem exigida: 1) procuração, 2) autorização oficial
-// (exatamente o mesmo arquivo gerado por pdfAuthorizationService — nunca
-// regenerada/redesenhada aqui), 3) documentos.
+// Junta procuração + autorização oficial (preenchida) em um único PDF, na
+// ordem exigida: 1) procuração, 2) autorização oficial (exatamente o mesmo
+// arquivo gerado por pdfAuthorizationService — nunca regenerada/redesenhada
+// aqui). Documentos do profissional continuam indo por WhatsApp.
 import { PDFDocument } from "https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/+esm";
 
 /**
@@ -27,22 +27,13 @@ async function appendPdfBytes(mergedDoc, sourceBytes) {
  * @param {Uint8Array} params.procuracaoBytes - imagem (jpg/png) da procuração já gerada
  * @param {string} params.procuracaoMimeType
  * @param {Uint8Array} params.autorizacaoPdfBytes - PDF oficial já preenchido (pdfAuthorizationService)
- * @param {{bytes: Uint8Array, mimeType: string}[]} params.documentos - na ordem de upload
  * @returns {Promise<Uint8Array>}
  */
-export async function mergeProcesso({ procuracaoBytes, procuracaoMimeType, autorizacaoPdfBytes, documentos = [] }) {
+export async function mergeProcesso({ procuracaoBytes, procuracaoMimeType, autorizacaoPdfBytes }) {
   const merged = await PDFDocument.create();
 
   await embedImageAsPage(merged, procuracaoBytes, procuracaoMimeType);
   await appendPdfBytes(merged, autorizacaoPdfBytes);
-
-  for (const documento of documentos) {
-    if (documento.mimeType === "application/pdf") {
-      await appendPdfBytes(merged, documento.bytes);
-    } else {
-      await embedImageAsPage(merged, documento.bytes, documento.mimeType);
-    }
-  }
 
   return merged.save();
 }
